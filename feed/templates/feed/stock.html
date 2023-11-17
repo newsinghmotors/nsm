@@ -1,0 +1,108 @@
+{% extends "feed/layout.html" %} {% load static %} {% block searchform %}
+{% comment %} <form class="form-inline my-2 my-lg-0 ml-5" action="{% url 'search' %}" method="get">
+  <input name="p" type="text" placeholder="Search posts.." />
+  <button class="btn btn-success my-2 my-sm-0 ml-4" type="submit">
+    Search
+  </button> 
+</form>{% endcomment %}
+{% endblock searchform %}
+
+{% block stockactive %}active{% endblock %}
+
+{% block content %}
+<style>
+  .odd  {
+    text-transform:capitalize;
+  }
+  a{
+    text-decoration:none;
+    color:black;
+  }
+</style>
+
+<div class="card">
+  <div class="">
+    <div id="DataTables_Table_0_wrapper" class="">
+      <div class="row m-2">
+        <div class="">
+          <div id="DataTables_Table_0_filter" class="d-flex justify-content-start">
+            <form class="form-inline" action="{% url 'stock' %}" method="get">
+              <input name="p" type="search" class="form-control" style="width: 200px;" placeholder="Search key" aria-controls="DataTables_Table_0">
+              <button class="btn btn-primary my-2 my-sm-0 ml-2" type="submit">Search</button>
+            </form>
+            <div class="ml-2 dt-buttons btn-group">
+              <a class=" my-2 btn btn-secondary btn-success" tabindex="0" aria-controls="DataTables_Table_0" type="button" href="{% url 'new-key' %}">
+                +
+              </a> 
+            </div>
+          </div>
+        </div>
+      </div>
+      <table class="table" style="border-collapse: separate;">
+        <thead class="table-light">
+          <tr>
+            <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 323px;" aria-label="Client: activate to sort column ascending">Key Name</th>
+            <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 88px;" aria-label="Total: activate to sort column ascending">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if keys_list %}
+          {% for key in keys_list %}
+            <tr class="odd">
+                <td><a href="{% url 'key-detail' key.id %}">{{key.name}}</a></td>
+                <td><a href="{% url 'key-detail' key.id %}">{{key.total}}</a></td>
+            </tr>
+        {% endfor %}
+        {% else %}
+        {% for key in keys %}
+            <tr class="odd">
+                <td><a href="{% url 'key-detail' key.id %}">{{key.name}}</a></td>
+                <td><a href="{% url 'key-detail' key.id %}">{{key.total}}</a></td>
+            </tr>
+          {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+      <div class="row mx-2">
+        {% comment %} <div class="col-sm-12 col-md-6">
+          <div class="dataTables_info" id="DataTables_Table_0_info" role="status" aria-live="polite">Showing 1 to 10 of 50 entries</div>
+        </div> {% endcomment %}
+        {% if is_paginated %}
+          <div class="col-sm-12 col-md-4" style="text-align:left;">
+            {% if page_obj.has_previous %}
+            <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
+            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+          </div>
+          <div class="col-sm-12 col-md-4" style="text-align:center;">
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} 
+            <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+          </div>
+          <div class="col-sm-12 col-md-4" style="text-align:right;">
+            {% if page_obj.has_next %}
+              <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
+              <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+    
+
+  {% endblock content %}
+
+  {% block jsfiles %}
+  <script>
+    
+  </script>
+  {% endblock jsfiles %}

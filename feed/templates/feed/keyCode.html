@@ -1,0 +1,105 @@
+{% extends "feed/layout.html" %} {% load static %}
+{% block homeactive %}active{% endblock homeactive %}
+{% block content %}
+
+<div class="row mt-5 m-2 p-2">
+    <div class="col-12">
+        <p>Encode</p>
+        <input id="encode" class="form-control" placeholder="Enter 8-digit Number" maxlength="8" onkeyup="updateEncodedValue()">
+        <p class="my-2" id="encoded_val"></p>
+    </div>
+</div>
+<div class="row mt-5 mb-5 m-2 p-2">
+    <div class="col-12">
+        <p>Decode</p>
+        <input id="decode" class="form-control" placeholder="Enter 5-digit Number" maxlength="5" onkeyup="updateDecodedValue()">
+        <p class="my-2" id="decoded_val"></p>
+  </div>
+</div>
+    
+
+
+  {% endblock content %}
+
+  {% block jsfiles %}
+  <script>
+    function updateEncodedValue() {
+        var encodeInput = document.getElementById("encode");
+        var inputValue = encodeInput.value;
+
+        var mappedValue = "";
+        if(inputValue.length>4){
+            mappedValue="B";
+            for (var i = 0; i < inputValue.length; i += 2) {
+                var pair = inputValue.slice(i, i + 2);
+                if(pair=="11") mappedValue+="H";
+                else if(pair=="12") mappedValue+="A";
+                else if(pair=="13") mappedValue+="R";
+                else if(pair=="21") mappedValue+="D";
+                else if(pair=="22") mappedValue+="E";
+                else if(pair=="23") mappedValue+="p";
+                else if(pair=="31") mappedValue+="S";
+                else if(pair=="32") mappedValue+="I";
+                else mappedValue+="N";
+            }
+        }
+        else{
+            mappedValue = "K";
+            for (var i = 0; i < inputValue.length; i++) {
+                var pair = inputValue[i];
+                if(pair=="1") mappedValue+="H";
+                else if(pair=="2") mappedValue+="A";
+                else if(pair=="3") mappedValue+="R";
+                else if(pair=="4") mappedValue+="D";
+                else if(pair=="5") mappedValue+="E";
+                else if(pair=="6") mappedValue+="p";
+                else if(pair=="7") mappedValue+="S";
+                else if(pair=="8") mappedValue+="I";
+                else if(pair=="9") mappedValue+="N";
+                else mappedValue+="0";
+            }
+        }
+        // Set the value to the element with id "encoded_val"
+        document.getElementById("encoded_val").textContent = "Encoded Value: " + mappedValue;
+    }
+    function updateDecodedValue() {
+        // Get the input element
+        var decodeInput = document.getElementById("decode");
+        var inputValue = decodeInput.value.toUpperCase();
+
+        var mappedValue = "";
+        if(inputValue[0]=='B'){
+            for (var i = 1; i < inputValue.length; i++) {
+                var pair = inputValue[i];
+                if(pair=="H") mappedValue+="11";
+                else if(pair=="A") mappedValue+="12";
+                else if(pair=="R") mappedValue+="13";
+                else if(pair=="D") mappedValue+="21";
+                else if(pair=="E") mappedValue+="22";
+                else if(pair=="P") mappedValue+="23";
+                else if(pair=="S") mappedValue+="31";
+                else if(pair=="I") mappedValue+="32";
+                else mappedValue+="33";
+            }
+        }
+        else{
+            mappedValue = "K";
+            for (var i = 1; i < inputValue.length; i++) {
+                var pair = inputValue[i];
+                if(pair=="H") mappedValue+="1";
+                else if(pair=="A") mappedValue+="2";
+                else if(pair=="R") mappedValue+="3";
+                else if(pair=="D") mappedValue+="4";
+                else if(pair=="E") mappedValue+="5";
+                else if(pair=="P") mappedValue+="6";
+                else if(pair=="S") mappedValue+="7";
+                else if(pair=="I") mappedValue+="8";
+                else if(pair=="N") mappedValue+="9";
+                else mappedValue+="0";
+            }
+        }
+        // Set the value to the element with id "encoded_val"
+        document.getElementById("decoded_val").textContent = "Decoded Value: " + mappedValue;
+    }
+</script>
+  {% endblock jsfiles %}

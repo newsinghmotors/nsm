@@ -1,0 +1,33 @@
+{% extends "feed/layout.html" %} {% load static %}
+{% block homeactive %}active{% endblock homeactive %}
+{% block content %}
+
+<div class="row mt-5 mb-4">
+  <div class="col-12">
+    <h1>{{key.name}}</h1>
+  </div>
+</div>
+<div class="row mb-2">
+  <div class="col-12">
+    <p class="ml-3" style="font-size:18px"><b>Name : </b>{{key.name}}</p>
+    <p class="ml-3" style="font-size:18px"><b>Saran : </b>{{key.saran}}</p>
+    <p class="ml-3" style="font-size:18px"><b>Minda : </b>{{key.minda}}</p>
+    <p class="ml-3" style="font-size:18px"><b>Madin : </b>{{key.madin}}</p>
+    <p class="ml-3" style="font-size:18px"><b>Total : </b>{{total}}</p>
+    <p class="ml-3" style="font-size:18px"><b>Last Updated on : </b>{{key.date}}</p>
+    <p class="ml-3" style="font-size:18px"><b>Actions : </b>
+        <a class="btn btn-primary" href="{% url 'key-update' key.id %}">Edit</a>
+        <a class="btn btn-danger" href="{% url 'key-delete' key.id %}">Delete</a>
+    </p>
+  </div>
+</div>
+    
+<script src="{% static 'base.js' %}"></script>
+
+  {% endblock content %}
+
+  {% block jsfiles %}
+  <script>
+    
+  </script>
+  {% endblock jsfiles %}

@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <link rel="icon" type="image/png" href="icon.png" />
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" />
+  <link rel="stylesheet" href="https://dl.dropboxusercontent.com/s/ecyb1drs5j1jyjf/styles.css?dl=0" type="text/css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/css/datepicker.css" type="text/css" />
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+  <!-- Bootstrap Font Icon CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  
+  {% block cssfiles %}{% endblock cssfiles %}
+  <title>New Singh Motors</title>
+</head>
+<body style="background-color: #f3f3f3">
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="logo">
+      <a href="/"><img src="\media\logo.png" /></a>
+    </div>
+    <a class="nav-item navbar-brand  ml-md-4" href="/"><b>New Singh Motors</b></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="navbar-nav input-group ml-auto mr-auto col-md-6 d-flex justify-content-evenly align-items-center" style="font-size:18px">
+        <a class="p-2 nav-item {% block homeactive %}{% endblock %}" href="{% url 'home' %}">Home</a>
+        <a class="p-2 nav-item {% block stockactive %}{% endblock %}" href="{% url 'stock' %}">Stock</a>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="row" style="width:100%;margin:0px;background-color:white">
+    <div class="col m-md-5" style="padding:0px;">
+        {% block content %}{% endblock content %}
+    </div>
+  </div>
+
+  <footer class="footer page-footer font-small black">
+    <div class="footer-copyright text-center py-3">
+      New Singh Motors © 2023 <br /><small class="text-muted">All rights reserved!</small>
+    </div>
+  </footer>
+
+  <!-- JS Files -->
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.4/xlsx.full.min.js"></script>
+  
+  {% block jsfiles %}{% endblock jsfiles %}
+</body>
+
+</html>
