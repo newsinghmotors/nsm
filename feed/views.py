@@ -79,8 +79,7 @@ def key_update(request, pk):
 
 def key_delete(request, pk):
     key = Keys.objects.get(pk=pk)
-    if request.user.is_authenticated:
-        key.delete()
+    key.delete()
     return redirect('stock')
 
 def search(request):
