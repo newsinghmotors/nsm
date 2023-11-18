@@ -71,7 +71,7 @@ def key_update(request, pk):
             data.user_name = user
             data.save()
             messages.success(request, 'Post Updated Successfully' if post else 'Posted Successfully')
-            return redirect('key-detail',pk)
+            return redirect('stock')
     else:
         form = NewKeyForm(instance=post)
     

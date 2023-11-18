@@ -30,13 +30,6 @@
     color: #fff;
     border-bottom: 4px solid transparent;
   }
-  .navbar-nav .nav-item:hover .nav-link {
-    color: #fff;
-    border-bottom: 4px solid rgb(236, 165, 13);
-  }
-  .navbar-nav .active {
-    border-bottom: 4px solid rgb(236, 165, 13);
-  }
   .navbar-nav a {
     text-decoration:none;
   }
@@ -44,7 +37,13 @@
     color:rgb(236, 165, 13);
   }
 
-
+.table-header{
+  border: 1px solid #c6c6c6;
+  border-bottom: 2px solid #000;
+}
+.key-body:hover{
+  background-color: #e8e8e8;
+}
 
 /* Animations */
 

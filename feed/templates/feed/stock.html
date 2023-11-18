@@ -14,7 +14,7 @@
   .odd  {
     text-transform:capitalize;
   }
-  a{
+  a,a:hover{
     text-decoration:none;
     color:black;
   }
@@ -38,31 +38,37 @@
           </div>
         </div>
       </div>
-      <table class="table" style="border-collapse: separate;">
-        <thead class="table-light">
-          <tr>
-            <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 323px;" aria-label="Client: activate to sort column ascending">Key Name</th>
-            <th class="sorting" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1" style="width: 88px;" aria-label="Total: activate to sort column ascending">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if keys_list %}
+      <div class="container p-0 m-0">
+      <div class="row mx-1 px-0 py-0 bg-light" style="font-size: 14px; font-weight: bold;">
+        <div class="col-6 px-2 py-2 table-header">Key Name</div>
+        <div class="col-2 px-0 py-2 table-header text-center">Saran</div>
+        <div class="col-2 px-0 py-2 table-header text-center">Minda</div>
+        <div class="col-2 px-0 py-2 table-header text-center">Madin</div>
+      </div>
+        {% if keys_list %}
           {% for key in keys_list %}
-            <tr class="odd">
-                <td><a href="{% url 'key-detail' key.id %}">{{key.name}}</a></td>
-                <td><a href="{% url 'key-detail' key.id %}">{{key.total}}</a></td>
-            </tr>
+          <a href="{% url 'key-detail' key.id %}">
+          <div class="row mx-2 p-2 bg-wight key-body" style="font-size: 14px;">
+            <div class="col-6 p-1">{{key.name}}</div>
+            <div class="col-2 p-0 text-center">{{key.saran}}</div>
+            <div class="col-2 p-0 text-center">{{key.minda}}</div>
+            <div class="col-2 p-0 text-center">{{key.madin}}</div>
+          </div>
+          </a>
         {% endfor %}
         {% else %}
-        {% for key in keys %}
-            <tr class="odd">
-                <td><a href="{% url 'key-detail' key.id %}">{{key.name}}</a></td>
-                <td><a href="{% url 'key-detail' key.id %}">{{key.total}}</a></td>
-            </tr>
+          {% for key in keys %}
+          <a href="{% url 'key-detail' key.id %}">
+          <div class="row mx-2 p-2 bg-wight key-body" style="font-size: 14px;">
+            <div class="col-6 p-0">{{key.name}}</div>
+            <div class="col-2 p-0 text-center">{{key.saran}}</div>
+            <div class="col-2 p-0 text-center">{{key.minda}}</div>
+            <div class="col-2 p-0 text-center">{{key.madin}}</div>
+          </div>
+          </a>
           {% endfor %}
-          {% endif %}
-        </tbody>
-      </table>
+        {% endif %}
+        </div>
       <div class="row mx-2">
         {% comment %} <div class="col-sm-12 col-md-6">
           <div class="dataTables_info" id="DataTables_Table_0_info" role="status" aria-live="polite">Showing 1 to 10 of 50 entries</div>
@@ -103,6 +109,6 @@
 
   {% block jsfiles %}
   <script>
-    
-  </script>
+
+</script>
   {% endblock jsfiles %}
