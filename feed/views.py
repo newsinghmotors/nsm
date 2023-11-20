@@ -24,7 +24,6 @@ class StockListView(ListView):
     model = Keys
     template_name = 'feed/stock.html'
     context_object_name = 'keys'
-    paginate_by = 10
     ordering = ['name']
     def get_context_data(self, **kwargs):
         context = super(StockListView, self).get_context_data(**kwargs)
