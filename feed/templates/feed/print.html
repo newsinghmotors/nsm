@@ -1,0 +1,118 @@
+{% extends "feed/layout.html" %} {% load static %}
+{% block printactive %}active{% endblock %}
+{% block content %}
+
+  <style>
+    #output {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .passport-photo {
+      width: 2in;
+      height: 2in;
+    }
+
+    #a4Canvas {
+      display: none;
+      margin-bottom: 0; /* Remove the gap between rows */
+    }
+
+    #generatedA4Image {
+      margin-bottom: 10px; /* Adjust margin as needed */
+    }
+  </style>
+
+  <input type="file" id="imageInput" accept="image/*" multiple>
+  <button onclick="processImages()">Show Passport Photos</button>
+  <div id="output"></div>
+  <button onclick="generateA4()">Generate A4 Image</button>
+  <div id="generatedA4ImageContainer"></div>
+  <canvas id="a4Canvas"></canvas>
+  <button onclick="downloadA4Image()">Download A4 Image</button>
+
+{% endblock content %}
+
+{% block jsfiles %}
+<script>
+  function processImages() {
+    const input = document.getElementById('imageInput');
+    const outputContainer = document.getElementById('output');
+    const a4Canvas = document.getElementById('a4Canvas');
+    const a4Ctx = a4Canvas.getContext('2d');
+    const generatedA4ImageContainer = document.getElementById('generatedA4ImageContainer');
+
+    // Clear previous images
+    outputContainer.innerHTML = '';
+    generatedA4ImageContainer.innerHTML = '';
+
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const img = new Image();
+        img.src = e.target.result;
+
+        img.onload = function () {
+          // Create a new image element with the original-sized image
+          const passportPhoto = new Image();
+          passportPhoto.src = e.target.result;
+          passportPhoto.className = 'passport-photo';
+
+          // Append the new image to the output container
+          outputContainer.appendChild(passportPhoto);
+        };
+      };
+
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function generateA4() {
+    const a4Canvas = document.getElementById('a4Canvas');
+    const a4Ctx = a4Canvas.getContext('2d');
+    const generatedA4ImageContainer = document.getElementById('generatedA4ImageContainer');
+
+    // Set A4 size (8.27 x 11.69 inches)
+    const a4Width = 8.27 * 96; // Assuming 96 DPI
+    const a4Height = 11.69 * 96; // Assuming 96 DPI
+
+    a4Canvas.width = a4Width;
+    a4Canvas.height = a4Height;
+
+    // Draw multiple copies of original-sized passport photos on the A4 canvas
+    const passportPhotos = document.querySelectorAll('.passport-photo');
+
+    for (let i = 0; i < 8; i++) {
+      const row = Math.floor(i / 4);
+      const col = i % 4;
+      const x = col * (passportPhotos[0].width + 10);
+      const y = row * (passportPhotos[0].height + 10);
+
+      const passportPhotoIndex = i % passportPhotos.length;
+      const passportPhoto = passportPhotos[passportPhotoIndex];
+
+      a4Ctx.drawImage(passportPhoto, x, y, passportPhoto.width, passportPhoto.height);
+    }
+
+    // Create an image element for the generated A4 image
+    const generatedA4Image = new Image();
+    generatedA4Image.src = a4Canvas.toDataURL('image/png');
+    generatedA4Image.id = 'generatedA4Image';
+
+    // Append the generated A4 image to the container
+    generatedA4ImageContainer.innerHTML = '';
+    generatedA4ImageContainer.appendChild(generatedA4Image);
+  }
+  function downloadA4Image() {
+    const generatedA4Image = document.getElementById('generatedA4Image');
+    const link = document.createElement('a');
+    link.href = generatedA4Image.src;
+    link.download = 'generatedA4Image.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+</script>
+{% endblock jsfiles %}

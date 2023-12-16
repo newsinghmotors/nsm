@@ -20,6 +20,9 @@ import json
 def KeyCode(request):
     return render(request, 'feed/keyCode.html')
 
+def PrintOptions(request):
+    return render(request, 'feed/print.html')
+
 class StockListView(ListView):
     model = Keys
     template_name = 'feed/stock.html'
