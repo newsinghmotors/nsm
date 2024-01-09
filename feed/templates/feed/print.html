@@ -10,8 +10,8 @@
     }
 
     .passport-photo {
-      width: 1.4in;
-      height: 1.4in;
+      width: 1.125in;
+      height: 1.5in;
       border: solid 2px #000;
     }
 
@@ -27,7 +27,7 @@
 
 <div class="container p-3">
   <div class="mb-3">
-    <label for="formFile" class="form-label">Select an image</label>
+    <label for="formFile" class="form-label">Select an image (3:4)</label>
     <input class="form-control" type="file" id="imageInput">
   </div>
   <button class="btn btn-primary mb-3" onclick="processImages()">Show Passport Photo</button>
@@ -98,11 +98,11 @@
     // Draw multiple copies of original-sized passport photos on the A4 canvas
     var passportPhotos = document.querySelectorAll('.passport-photo');
 
-    for (let i = 0; i < (5*rows); i++) {
-        const row = Math.floor(i / 5);
-        const col = i % 5;
-        const x = col * (passportPhotos[0].width + 20);
-        const y = row * (passportPhotos[0].height + 20);
+    for (let i = 0; i < (6*rows); i++) {
+        const row = Math.floor(i / 6);
+        const col = i % 6;
+        const x = col * (passportPhotos[0].width + 20) +20;
+        const y = row * (passportPhotos[0].height + 20) +20;
 
         const passportPhotoIndex = i % passportPhotos.length;
         const passportPhoto = passportPhotos[passportPhotoIndex];
