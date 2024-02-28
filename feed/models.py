@@ -19,9 +19,9 @@ def compress(image):
 
 class Keys(models.Model):
     name = models.CharField(max_length=255)
-    saran = models.IntegerField(blank=True,null=True,default=0)
-    minda = models.IntegerField(blank=True,null=True,default=0)
-    madin = models.IntegerField(blank=True,null=True,default=0)
+    saran = models.IntegerField(blank=False,default=0)
+    minda = models.IntegerField(blank=False,default=0)
+    madin = models.IntegerField(blank=False,default=0)
     date = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
