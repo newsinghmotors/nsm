@@ -23,6 +23,9 @@ def KeyCode(request):
 def PrintOptions(request):
     return render(request, 'feed/print.html')
 
+def CombineImg(request):
+    return render(request, 'feed/combine.html')
+
 class StockListView(ListView):
     model = Keys
     template_name = 'feed/stock.html'
@@ -39,6 +42,7 @@ class StockListView(ListView):
         for key in keys_list:
             key.total = key.saran  + key.minda + key.madin
         context['keys_list'] = keys_list
+        context['query'] = query
         return context
 
 def key_detail(request, pk):

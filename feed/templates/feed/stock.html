@@ -27,7 +27,7 @@
         <div class="">
           <div id="DataTables_Table_0_filter" class="d-flex justify-content-start">
             <form class="form-inline" action="{% url 'stock' %}" method="get">
-              <input name="p" type="search" class="form-control" style="width: 200px;" placeholder="Search key" aria-controls="DataTables_Table_0">
+              <input name="p" type="search" class="form-control" style="width: 200px;" placeholder="Search key" {% if query %} value="{{query}}" {% endif %} aria-controls="DataTables_Table_0">
               <button class="btn btn-primary my-2 my-sm-0 ml-2" type="submit">Search</button>
             </form>
             <div class="ml-2 dt-buttons btn-group">

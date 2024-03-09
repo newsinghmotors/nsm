@@ -1,0 +1,138 @@
+{% extends "feed/layout.html" %} {% load static %}
+{% block combineactive %}active{% endblock %}
+{% block content %}
+
+  <style>
+    #output {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    #a4Canvas {
+      display: none;
+      margin-bottom: 0; /* Remove the gap between rows */
+    }
+    
+    .a4 {
+      width: 90vw;
+      height: 127.28vw;
+      background-color: white;
+      position: relative;
+      border: 1px solid #000;
+    }
+    @media print {
+        @page {
+          size: A4;
+          margin: 10px;
+          left: 50%;
+        }
+    }
+    .a4 img {
+            max-height: 40%;
+            display: block;
+                margin-left: auto;
+                margin-right: auto;
+    
+    }
+  </style>
+
+<div class="container p-3">
+  <div class="mb-3">
+    <label for="formFile" class="form-label">Select Front Image</label>
+    <input class="form-control" type="file" id="imageInput1">
+  </div>
+  <div class="mb-3">
+      <label for="formFile" class="form-label">Select Back Image</label>
+      <input class="form-control" type="file" id="imageInput2">
+    </div>
+<label for="formFile" class="form-label">Preview</label>
+    <div class="a4" id="a4page">
+        <div class="mb-3 my-3" id="output1"></div>
+        <div class="mb-3" id="output2"></div>
+    </div>
+    <button class="btn btn-primary my-3" onclick="downloadA4Page()">Print Image</button>
+</div>
+
+{% endblock content %}
+
+{% block jsfiles %}
+<script>
+    
+    document.getElementById('imageInput1').addEventListener('change', handleImageUpload1);
+    function handleImageUpload1() {
+        const preview = document.getElementById('output1');
+        preview.innerHTML = '';
+        const files = document.getElementById('imageInput1').files;
+
+        for (const file of files) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const image = document.createElement('img');
+                image.src = e.target.result;
+                image.style.maxHeight = '45vw';
+                image.style.maxWidth = '80vw';
+                preview.appendChild(image);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    document.getElementById('imageInput2').addEventListener('change', handleImageUpload2);
+    function handleImageUpload2() {
+        const preview = document.getElementById('output2');
+        preview.innerHTML = '';
+        const files = document.getElementById('imageInput2').files;
+
+        for (const file of files) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const image = document.createElement('img');
+                image.src = e.target.result;
+                image.style.maxHeight = '45vw';
+                image.style.maxWidth = '80vw';
+                preview.appendChild(image);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    function downloadA4Page() {
+        const a4Page = document.getElementById("a4page");
+
+        // Create a clone of the A4 div with necessary styles applied
+        const printableDiv = a4Page.cloneNode(true);
+
+        // Wrap the cloned div in a new window for printing
+        const newWindow = window.open();
+        newWindow.document.write(`
+            <html><head><title>A4 Page</title>
+            <style>
+            @page { size: A4; margin: 15 px; }
+            body { padding: 15px; margin: 0; }
+            .a4 { 
+                margin: 0 auto;
+                width: 210mm;
+                height: 297mm;
+                background-color: white;
+                position: relative;
+            }
+            .a4 img {
+                max-height: 40%;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                max-height : 130mm;
+                max-width : 100mm;
+        
+        }
+            .mb-3 { margin-bottom: 1.1rem !important; }
+            </style>
+        </head><body>` + printableDiv.outerHTML + `</body></html>`
+        );
+        newWindow.document.close(); // Ensures content is loaded before printing
+        newWindow.print();
+        newWindow.close();
+      }
+</script>
+{% endblock jsfiles %}

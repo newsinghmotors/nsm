@@ -5,6 +5,7 @@ from . import views
 urlpatterns=[
 	path('', views.KeyCode, name='home'),
 	path('print/', views.PrintOptions, name='print'),
+	path('combine/', views.CombineImg, name='combine'),
 	path('stock/', views.StockListView.as_view(), name='stock'),
 	path('key/new/', views.create_post, name='new-key'),
 	path('key/<int:pk>/', views.key_detail, name='key-detail'),
