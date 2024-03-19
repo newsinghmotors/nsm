@@ -27,7 +27,7 @@
         <div class="">
           <div id="DataTables_Table_0_filter" class="d-flex justify-content-start">
             <form class="form-inline" action="{% url 'stock' %}" method="get">
-              <input name="p" type="search" class="form-control" style="width: 200px;" placeholder="Search key" {% if query %} value="{{query}}" {% endif %} aria-controls="DataTables_Table_0">
+              <input name="p" type="search" class="form-control" style="width: 180px;" placeholder="Search key" {% if query %} value="{{query}}" {% endif %} aria-controls="DataTables_Table_0">
               <button class="btn btn-primary my-2 my-sm-0 ml-2" type="submit">Search</button>
             </form>
             <div class="ml-2 dt-buttons btn-group">
@@ -43,7 +43,7 @@
         <div class="col-6 px-2 py-2 table-header">Key Name</div>
         <div class="col-2 px-0 py-2 table-header text-center">Saran</div>
         <div class="col-2 px-0 py-2 table-header text-center">Minda</div>
-        <div class="col-2 px-0 py-2 table-header text-center">Madin</div>
+        <div class="col-2 px-0 py-2 table-header text-center">Polythene</div>
       </div>
         {% if keys_list %}
           {% for key in keys_list %}
