@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+# Load the .env file
+load_dotenv()
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -155,3 +159,7 @@ GCS_USE_UNSIGNED_URLS = True
 
 DJANGO_SETTINGS_MODULE='correctly_settings'
 DEFAULT_AUTO_FIELD='django.db.models.AutoField' 
+
+
+MSG91_AUTH_KEY = "492579A2dq5Q4uvZyi6988627fP1"
+MSG91_EMAIL_DOMAIN = "newsinghmotors.in"

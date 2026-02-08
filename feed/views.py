@@ -8,12 +8,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, UpdateView, DeleteView
 from django.views.decorators.http import require_POST
+import requests
 from .models import Keys
-from .forms import NewKeyForm
+from .forms import NewKeyForm, EmailForm
 from django.db.models import Sum
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django import forms
+from twilio.rest import Client
+from django.conf import settings
 
 import json
 
@@ -97,3 +100,59 @@ def search(request):
         'keys_list': keys_list,
     }
     return render(request, "feed/stock.html", context)
+
+def send_email_view(request):
+    if request.method == 'POST':
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            # Extract data from form
+            recipient_email = form.cleaned_data['email']
+            recipient_name = form.cleaned_data['full_name']
+            otp_val = form.cleaned_data['otp_code']
+
+            # MSG91 API Config
+            url = "https://control.msg91.com/api/v5/email/send"
+            headers = {
+                "Content-Type": "application/json",
+                "authkey": settings.MSG91_AUTH_KEY
+            }
+
+            # Prepare Email Payload
+            payload = {
+                "recipients": [
+                    {
+                        "to": [
+                            {
+                                "email": recipient_email,
+                                "name": recipient_name
+                            }
+                        ],
+                        "variables": {
+                            "company_name": "My Company", # Or settings.COMPANY_NAME
+                            "otp": otp_val
+                        }
+                    }
+                ],
+                "from": {
+                    "email": f"no-reply@{settings.MSG91_EMAIL_DOMAIN}"
+                },
+                "domain": settings.MSG91_EMAIL_DOMAIN,
+                "template_id": "global_otp"
+            }
+
+            try:
+                response = requests.post(url, json=payload, headers=headers)
+                result = response.json()
+
+                if response.status_code == 200:
+                    messages.success(request, "Email sent successfully!")
+                else:
+                    error_info = result.get('message', 'Check MSG91 dashboard')
+                    messages.error(request, f"MSG91 Error: {error_info}")
+            
+            except Exception as e:
+                messages.error(request, f"System Error: {str(e)}")
+    else:
+        form = EmailForm()
+
+    return render(request, 'feed/send_email.html', {'form': form})
