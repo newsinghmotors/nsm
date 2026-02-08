@@ -1,24 +1,10 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
-from django.urls import reverse
-from django.core.paginator import Paginator
 from django.contrib import messages
-from django.contrib.auth.models import User
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import login_required
-from django.views.generic import ListView, UpdateView, DeleteView
-from django.views.decorators.http import require_POST
+from django.views.generic import ListView
 import requests
 from .models import Keys
 from .forms import NewKeyForm, EmailForm
-from django.db.models import Sum
-from django.utils import timezone
-from django.utils.decorators import method_decorator
-from django import forms
-from twilio.rest import Client
 from django.conf import settings
-
-import json
 
 def KeyCode(request):
     return render(request, 'feed/keyCode.html')
