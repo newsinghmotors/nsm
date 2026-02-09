@@ -94,7 +94,8 @@ def send_email_view(request):
             # Extract data from form
             recipient_email = form.cleaned_data['email']
             recipient_name = form.cleaned_data['full_name']
-            otp_val = form.cleaned_data['otp_code']
+            vehicle_info = form.cleaned_data['vehicle_info']
+            key_code = form.cleaned_data['key_code']
 
             # MSG91 API Config
             url = "https://control.msg91.com/api/v5/email/send"
@@ -114,16 +115,19 @@ def send_email_view(request):
                             }
                         ],
                         "variables": {
-                            "company_name": "My Company", # Or settings.COMPANY_NAME
-                            "otp": otp_val
+                            "customer_name": recipient_name,
+                            "vehicle_info": vehicle_info,
+                            "key_code": key_code,
+                            "otp": key_code
                         }
                     }
                 ],
                 "from": {
-                    "email": f"no-reply@{settings.MSG91_EMAIL_DOMAIN}"
+                    "email": f"no-reply@{settings.MSG91_EMAIL_DOMAIN}",
+                    "name": "New Singh Motors"
                 },
                 "domain": settings.MSG91_EMAIL_DOMAIN,
-                "template_id": "global_otp"
+                "template_id": "key_code"
             }
 
             try:
