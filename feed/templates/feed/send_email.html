@@ -1,22 +1,114 @@
-{% extends "feed/layout.html" %} {% load static %}
+{% extends "feed/layout.html" %} 
+{% load static %}
 {% block keycodeactive %}active{% endblock %}
+
 {% block content %}
+<style>
+    .mail-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
+    .mail-container h2 {
+        margin-top: 0;
+        color: #333;
+        font-weight: 600;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+    }
 
-<h2>Send Email</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Send Now</button>
-</form>
+    /* Targeting the Django {{ form.as_p }} structure */
+    .mail-container p {
+        margin-bottom: 1.2rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mail-container label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #555;
+    }
+
+    .mail-container input, 
+    .mail-container textarea, 
+    .mail-container select {
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+        width: 100%;
+        box-sizing: border-box; /* Ensures padding doesn't break width */
+    }
+
+    .mail-container input:focus {
+        outline: none;
+        border-color: #4A90E2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    .btn-send {
+        background-color: #4A90E2;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: background 0.3s ease;
+    }
+
+    .btn-send:hover {
+        background-color: #357ABD;
+    }
+
+    .message-banner {
+        padding: 1rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+        text-align: center;
+        list-style: none;
+    }
+
+    .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+    /* Mobile adjustments */
+    @media (max-width: 480px) {
+        .mail-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="mail-container">
+    <h2>Send Email</h2>
+    
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-send">Send Now</button>
+    </form>
 
     {% if messages %}
-        {% for message in messages %}
-            <p style="color: {% if message.tags == 'success' %}green{% else %}red{% endif %};">
-                {{ message }}
-            </p>
-        {% endfor %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message-banner {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
-
+</div>
 
 {% endblock content %}
