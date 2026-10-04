@@ -1,139 +1,467 @@
-{% extends "feed/layout.html" %} {% load static %}
+{% extends "feed/layout.html" %} 
+{% load static %}
 {% block printactive %}active{% endblock %}
+
 {% block content %}
+<style>
+  /* Modern styling overrides */
+  .preview-card {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-  <style>
-    #output {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+  /* Preview of the generated sheet (A4 or 4x6) */
+  #generatedA4Image {
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid #ddd;
+    background: #fff;
+  }
 
-    .passport-photo {
-      width: 3.515in;
-      height: 4.687in;
-      border: solid 2px #000;
-    }
+  .hidden-canvas {
+    display: none !important;
+  }
+</style>
 
-    #a4Canvas {
-      display: none;
-      margin-bottom: 0; /* Remove the gap between rows */
-    }
+<div class="container py-4">
+  <div class="row g-4">
+    
+    <div class="col-md-5 col-lg-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h4 class="card-title mb-4 fw-bold text-primary">Passport Grid Generator</h4>
 
-    #generatedA4Image {
-      margin-bottom: 10px; /* Adjust margin as needed */
-    }
-  </style>
+          <!-- Paper size -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold d-block">Paper size</label>
+            <div class="btn-group w-100" role="group" aria-label="Paper size">
+              <input type="radio" class="btn-check" name="paperSize" id="paperA4" value="a4" autocomplete="off" checked onchange="onPaperChange()">
+              <label class="btn btn-outline-primary" for="paperA4">A4</label>
 
-<div class="container p-3">
-  <div class="mb-3">
-    <label for="formFile" class="form-label">Select an image (3:4)</label>
-    <input class="form-control" type="file" id="imageInput">
-  </div>
-  <button class="btn btn-primary mb-3" onclick="processImages()">Show Passport Photo</button>
-  <div class="mb-3" id="output"></div>
-  <div class="input-group mb-3">
-    <input type="text" class="form-control" placeholder="Number of rows (1-7)" value="1" id="countInput">
-    <div class="input-group-append">
-      <button class="btn btn-primary" onclick="generateA4()">Generate A4 Image</button>
+              <input type="radio" class="btn-check" name="paperSize" id="paper4x6" value="4x6" autocomplete="off" onchange="onPaperChange()">
+              <label class="btn btn-outline-primary" for="paper4x6">4 × 6 in (portrait)</label>
+            </div>
+            <div class="form-text" id="paperInfo"></div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="imageInput1" class="form-label fw-semibold">
+              Upload Image 1 <span id="image1Hint" class="text-muted fw-normal"></span>
+            </label>
+            <input class="form-control" type="file" id="imageInput1" accept="image/*" onchange="processImage(1)">
+          </div>
+
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" role="switch" id="syncImagesToggle" checked onchange="toggleSyncOption()">
+            <label class="form-check-label fw-semibold text-secondary" for="syncImagesToggle">Use Image 1 for all photos</label>
+          </div>
+
+          <div class="mb-4" id="image2InputContainer" style="display: none;">
+            <label for="imageInput2" class="form-label fw-semibold">
+              Upload Image 2 <span id="image2Hint" class="text-muted fw-normal"></span>
+            </label>
+            <input class="form-control" type="file" id="imageInput2" accept="image/*" onchange="processImage(2)">
+          </div>
+
+          <div class="mb-4">
+            <label for="countInput" class="form-label fw-semibold">Number of rows (<span id="rowsRangeLabel">1-6</span>)</label>
+            <div class="input-group">
+              <input type="number" class="form-control" min="1" max="6" value="1" id="countInput" oninput="onRowsChange()">
+              <span class="input-group-text bg-light text-muted" id="rowsMaxBadge">Max 6</span>
+            </div>
+            <div class="form-text" id="photoCountInfo"></div>
+          </div>
+
+          <!-- Only shown for 4x6 when two different images are used -->
+          <div class="mb-4" id="img1RowsContainer" style="display: none;">
+            <label for="img1RowsInput" class="form-label fw-semibold">Rows for Image 1</label>
+            <input type="number" class="form-control" min="0" max="3" value="1" id="img1RowsInput" oninput="onImg1RowsChange()">
+            <div class="form-text" id="img1RowsHint"></div>
+          </div>
+
+          <div class="form-check form-switch mb-4">
+            <input class="form-check-input" type="checkbox" role="switch" id="borderToggle" checked onchange="generateA4()">
+            <label class="form-check-label fw-semibold" for="borderToggle">Add borders</label>
+          </div>
+
+          <hr class="text-muted my-4">
+
+          <div class="d-grid gap-2">
+            <button id="downloadBtn" class="btn btn-success btn-lg d-flex align-items-center justify-content-center gap-2" onclick="downloadA4Image()" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v2.5a.5.5 0 0 1-1 0v-2.5a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v2.5a.5.5 0 0 1-.5-.5z"/>
+                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+              </svg>
+              <span id="downloadBtnLabel">Download Printable A4</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <div class="col-md-7 col-lg-8">
+      <div class="h-100 d-flex flex-column">
+        <label class="form-label fw-semibold text-secondary mb-2">Print Preview Workspace</label>
+        <div class="preview-card flex-grow-1 p-3">
+          <div id="previewPlaceholder" class="text-center text-muted">
+            <p class="mb-0 fs-5">Please upload image 1 to view the layout preview.</p>
+          </div>
+          <div id="generatedA4ImageContainer" class="w-100 d-flex justify-content-center"></div>
+        </div>
+      </div>
+    </div>
+
   </div>
-  <div class="mb-3" id="generatedA4ImageContainer"></div>
-  <canvas class="mb-3" id="a4Canvas"></canvas>
-  <button class="btn btn-primary mb-3" onclick="downloadA4Image()">Download A4 Image</button>
 </div>
 
+<canvas id="a4Canvas" class="hidden-canvas"></canvas>
 {% endblock content %}
+
 
 {% block jsfiles %}
 <script>
-  function processImages() {
-    const input = document.getElementById('imageInput');
-    const outputContainer = document.getElementById('output');
-    const a4Canvas = document.getElementById('a4Canvas');
-    const a4Ctx = a4Canvas.getContext('2d');
-    const generatedA4ImageContainer = document.getElementById('generatedA4ImageContainer');
+  let uploadedImg1 = null;
+  let uploadedImg2 = null;
+  let img1RowsTouched = false; // once the user edits "Rows for Image 1", stop auto-balancing it
 
-    // Clear previous images
-    outputContainer.innerHTML = '';
-    generatedA4ImageContainer.innerHTML = '';
+  // Photo size stays identical on every paper size (300 DPI, ~28.6 x 38.1 mm)
+  const PHOTO_W = 337.44;
+  const PHOTO_H = 449.95;
+
+  // Paper definitions (all at 300 DPI)
+  const PAPERS = {
+    'a4': {
+      name: 'A4',
+      width: Math.round(8.27 * 300),    // 2481 px
+      height: Math.round(11.69 * 300),  // 3507 px
+      cols: 6,
+      gap: 60,
+      marginX: 80,
+      marginY: 80,
+      centerX: false,
+      file: 'passport_grid_a4.png',
+      info: 'A4 (210 x 297 mm), 6 photos per row.',
+      hint1: '(left 3 slots)',
+      hint2: '(right 3 slots)'
+    },
+    '4x6': {
+      name: '4x6',
+      width: 4 * 300,                   // 1200 px
+      height: 6 * 300,                  // 1800 px
+      cols: 3,
+      gap: 60,
+      marginX: 0,
+      marginY: 60,
+      centerX: true,                    // 3 photos are centred horizontally
+      file: 'passport_grid_4x6.png',
+      info: '4 x 6 inch portrait, 3 photos per row.',
+      hint1: '(first rows)',
+      hint2: '(remaining rows)'
+    }
+  };
+
+  function getPaperKey() {
+    const checked = document.querySelector('input[name="paperSize"]:checked');
+    return checked ? checked.value : 'a4';
+  }
+
+  function getPaper() {
+    return PAPERS[getPaperKey()];
+  }
+
+  // How many rows physically fit on the selected paper
+  function getMaxRows(paper) {
+    return Math.max(1, Math.floor((paper.height - 2 * paper.marginY + paper.gap) / (PHOTO_H + paper.gap)));
+  }
+
+  function isSynced() {
+    return document.getElementById('syncImagesToggle').checked;
+  }
+
+  function getRows() {
+    const paper = getPaper();
+    const maxRows = getMaxRows(paper);
+    let rows = parseInt(document.getElementById('countInput').value, 10);
+    if (isNaN(rows) || rows < 1) rows = 1;
+    if (rows > maxRows) rows = maxRows;
+    return rows;
+  }
+
+  function getImg1Rows(rows) {
+    const input = document.getElementById('img1RowsInput');
+    let n = parseInt(input.value, 10);
+    if (isNaN(n)) n = Math.ceil(rows / 2);
+    return Math.min(Math.max(n, 0), rows);
+  }
+
+  /* ---------- UI state ---------- */
+
+  function refreshFormState() {
+    const paperKey = getPaperKey();
+    const paper = getPaper();
+    const maxRows = getMaxRows(paper);
+    const synced = isSynced();
+
+    // Rows input limits
+    const countInput = document.getElementById('countInput');
+    countInput.max = maxRows;
+    if (parseInt(countInput.value, 10) > maxRows) countInput.value = maxRows;
+    document.getElementById('rowsRangeLabel').textContent = `1-${maxRows}`;
+    document.getElementById('rowsMaxBadge').textContent = `Max ${maxRows}`;
+
+    const rows = getRows();
+    document.getElementById('photoCountInfo').textContent =
+      `${rows * paper.cols} photo${rows * paper.cols === 1 ? '' : 's'} on the sheet.`;
+
+    // Labels
+    document.getElementById('paperInfo').textContent = paper.info;
+    document.getElementById('downloadBtnLabel').textContent =
+      paperKey === '4x6' ? 'Download Printable 4x6' : 'Download Printable A4';
+    document.getElementById('image1Hint').textContent = synced ? '' : paper.hint1;
+    document.getElementById('image2Hint').textContent = paper.hint2;
+
+    // Image 2 upload visibility
+    document.getElementById('image2InputContainer').style.display = synced ? 'none' : 'block';
+
+    // "Rows for Image 1" is only needed on 4x6 with two images
+    const img1RowsContainer = document.getElementById('img1RowsContainer');
+    const showRowSplit = (paperKey === '4x6' && !synced);
+    img1RowsContainer.style.display = showRowSplit ? 'block' : 'none';
+
+    if (showRowSplit) {
+      const img1Input = document.getElementById('img1RowsInput');
+      img1Input.max = rows;
+      if (!img1RowsTouched) img1Input.value = Math.ceil(rows / 2);
+      if (parseInt(img1Input.value, 10) > rows) img1Input.value = rows;
+      const n1 = getImg1Rows(rows);
+      const n2 = rows - n1;
+      document.getElementById('img1RowsHint').textContent =
+        `Image 1: ${n1} row${n1 === 1 ? '' : 's'}, Image 2: ${n2} row${n2 === 1 ? '' : 's'}.`;
+    }
+  }
+
+  function onPaperChange() {
+    refreshFormState();
+    generateA4();
+  }
+
+  function onRowsChange() {
+    refreshFormState();
+    generateA4();
+  }
+
+  function onImg1RowsChange() {
+    img1RowsTouched = true;
+    refreshFormState();
+    generateA4();
+  }
+
+  function toggleSyncOption() {
+    refreshFormState();
+    generateA4();
+  }
+
+  /* ---------- Image loading ---------- */
+
+  function processImage(imageNum) {
+    const input = document.getElementById(`imageInput${imageNum}`);
+    const placeholder = document.getElementById('previewPlaceholder');
+    const downloadBtn = document.getElementById('downloadBtn');
 
     if (input.files && input.files[0]) {
       const reader = new FileReader();
 
       reader.onload = function (e) {
-        const img = new Image();
-        img.src = e.target.result;
+        const imgObj = new Image();
+        imgObj.src = e.target.result;
 
-        img.onload = function () {
-          // Create a new image element with the original-sized image
-          const passportPhoto = new Image();
-          passportPhoto.src = e.target.result;
-          passportPhoto.className = 'passport-photo';
+        imgObj.onload = function () {
+          if (imageNum === 1) {
+            uploadedImg1 = imgObj;
+          } else {
+            uploadedImg2 = imgObj;
+          }
 
-          // Append the new image to the output container
-          outputContainer.appendChild(passportPhoto);
+          if (placeholder) placeholder.style.display = 'none';
+          downloadBtn.disabled = false;
+          
+          generateA4();
         };
       };
 
       reader.readAsDataURL(input.files[0]);
+    } else {
+      if (imageNum === 1) uploadedImg1 = null;
+      if (imageNum === 2) uploadedImg2 = null;
+      
+      const hasAnyActiveImage = isSynced() ? uploadedImg1 : (uploadedImg1 || uploadedImg2);
+
+      if (!hasAnyActiveImage) {
+        if (placeholder) placeholder.style.display = 'block';
+        downloadBtn.disabled = true;
+        document.getElementById('generatedA4ImageContainer').innerHTML = '';
+      } else {
+        generateA4();
+      }
     }
+  }
+
+  /* ---------- Sheet rendering ---------- */
+
+  // Decides which uploaded image belongs in a given grid cell
+  function pickImage(row, col, synced, paperKey, img1Rows) {
+    if (synced) return uploadedImg1;
+    if (paperKey === '4x6') {
+      // Two images on 4x6: split by rows
+      return row < img1Rows ? uploadedImg1 : uploadedImg2;
+    }
+    // Two images on A4: left 3 columns / right 3 columns
+    return col < 3 ? uploadedImg1 : uploadedImg2;
   }
 
   function generateA4() {
+    const synced = isSynced();
+    
+    // Safety exit conditions matching state options
+    if (synced && !uploadedImg1) return;
+    if (!synced && !uploadedImg1 && !uploadedImg2) return;
+
+    const paperKey = getPaperKey();
+    const paper = getPaper();
+    const rows = getRows();
+    const img1Rows = getImg1Rows(rows);
+
     const a4Canvas = document.getElementById('a4Canvas');
-    const countInput = document.getElementById('countInput');
-    const inputValue = countInput.value;
-    const rows = parseInt(inputValue, 10);
-    const a4Ctx = a4Canvas.getContext('2d');
+    const borderToggle = document.getElementById('borderToggle');
     const generatedA4ImageContainer = document.getElementById('generatedA4ImageContainer');
 
-    // Set A4 size (8.27 x 11.69 inches)
-    const a4Width = 8.27 * 300; // Assuming 96 DPI
-    const a4Height = 11.69 * 300; // Assuming 96 DPI
+    const a4Ctx = a4Canvas.getContext('2d');
 
-    a4Canvas.width = a4Width;
-    a4Canvas.height = a4Height;
+    a4Canvas.width = paper.width;
+    a4Canvas.height = paper.height;
 
-    // Draw multiple copies of original-sized passport photos on the A4 canvas
-    var passportPhotos = document.querySelectorAll('.passport-photo');
+    a4Ctx.fillStyle = "#FFFFFF";
+    a4Ctx.fillRect(0, 0, paper.width, paper.height);
 
-    for (let i = 0; i < (6*rows); i++) {
-        const row = Math.floor(i / 6);
-        const col = i % 6;
-        const x = col * (passportPhotos[0].width + 60) +80;
-        const y = row * (passportPhotos[0].height + 60) +80;
-      
-        const passportPhotoIndex = i % passportPhotos.length;
-        const passportPhoto = passportPhotos[passportPhotoIndex];
+    // Horizontal start: fixed margin (A4) or centred block (4x6)
+    const gridWidth = paper.cols * PHOTO_W + (paper.cols - 1) * paper.gap;
+    const startX = paper.centerX ? (paper.width - gridWidth) / 2 : paper.marginX;
+    const startY = paper.marginY;
 
-        // Draw the passport photo on the A4 canvas
-        a4Ctx.drawImage(passportPhoto, x, y, passportPhoto.width, passportPhoto.height);
+    for (let i = 0; i < (paper.cols * rows); i++) {
+        const row = Math.floor(i / paper.cols);
+        const col = i % paper.cols;
+        
+        const x = startX + col * (PHOTO_W + paper.gap);
+        const y = startY + row * (PHOTO_H + paper.gap);
 
-        // Draw a border around the passport photo
-        a4Ctx.strokeStyle = "#000000"; // Border color
-        a4Ctx.lineWidth = 2; // Border width
-        a4Ctx.strokeRect(x, y, passportPhoto.width, passportPhoto.height);
+        const currentImgToDraw = pickImage(row, col, synced, paperKey, img1Rows);
+
+        if (currentImgToDraw) {
+          a4Ctx.drawImage(currentImgToDraw, x, y, PHOTO_W, PHOTO_H);
+
+          // Render borders only if an image is populated in the grid cell
+          if (borderToggle.checked) {
+            a4Ctx.strokeStyle = "#000000"; 
+            a4Ctx.lineWidth = 2; 
+            a4Ctx.strokeRect(x, y, PHOTO_W, PHOTO_H);
+          }
+        }
     }
 
-    // Create an image element for the generated A4 image
     const generatedA4Image = new Image();
     generatedA4Image.src = a4Canvas.toDataURL('image/png');
     generatedA4Image.id = 'generatedA4Image';
+    // Keep the 4x6 preview from becoming oversized on wide screens
+    generatedA4Image.style.maxWidth = paperKey === '4x6' ? '420px' : '100%';
 
-    // Append the generated A4 image to the container
     generatedA4ImageContainer.innerHTML = '';
     generatedA4ImageContainer.appendChild(generatedA4Image);
-}
+  }
+
+  /* ---------- Download (PNG with 300 DPI metadata) ---------- */
+
+  // Builds the CRC32 lookup table used by PNG chunks
+  const CRC_TABLE = (function () {
+    const table = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) {
+        c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      }
+      table[n] = c >>> 0;
+    }
+    return table;
+  })();
+
+  function crc32(bytes) {
+    let crc = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) {
+      crc = CRC_TABLE[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+    }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  // Inserts a pHYs chunk so print dialogs treat the PNG as 300 DPI
+  // (this keeps passport photos at their real physical size when printed)
+  function pngDataUrlWithDpi(dataUrl, dpi) {
+    const bin = atob(dataUrl.split(',')[1]);
+    const png = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) png[i] = bin.charCodeAt(i);
+
+    const ppm = Math.round(dpi / 0.0254); // pixels per metre
+    const chunk = new Uint8Array(21);     // 4 length + 4 type + 9 data + 4 crc
+    const view = new DataView(chunk.buffer);
+    view.setUint32(0, 9);
+    chunk.set([0x70, 0x48, 0x59, 0x73], 4); // "pHYs"
+    view.setUint32(8, ppm);
+    view.setUint32(12, ppm);
+    chunk[16] = 1;                          // unit = metre
+    view.setUint32(17, crc32(chunk.subarray(4, 17)));
+
+    // Insert right after the IHDR chunk (8-byte signature + 25-byte IHDR)
+    const insertAt = 33;
+    const out = new Uint8Array(png.length + chunk.length);
+    out.set(png.subarray(0, insertAt), 0);
+    out.set(chunk, insertAt);
+    out.set(png.subarray(insertAt), insertAt + chunk.length);
+
+    return URL.createObjectURL(new Blob([out], { type: 'image/png' }));
+  }
 
   function downloadA4Image() {
     const generatedA4Image = document.getElementById('generatedA4Image');
+    if (!generatedA4Image) return;
+
+    const paper = getPaper();
+    let href = generatedA4Image.src;
+    let isBlob = false;
+
+    try {
+      href = pngDataUrlWithDpi(generatedA4Image.src, 300);
+      isBlob = true;
+    } catch (err) {
+      // Fall back to the plain PNG if the metadata step fails
+      console.warn('Could not embed DPI info, downloading plain PNG.', err);
+    }
+
     const link = document.createElement('a');
-    link.href = generatedA4Image.src;
-    link.download = 'generatedA4Image.png';
+    link.href = href;
+    link.download = paper.file;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    if (isBlob) setTimeout(() => URL.revokeObjectURL(href), 1000);
   }
+
+  // Initial form state
+  refreshFormState();
 </script>
 {% endblock jsfiles %}
